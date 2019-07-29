@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from 'styled-components';
 import Video from '../Video';
 import Playlist from './Playlist';
-import StyledWbnPlayer from '../styles/StyledWbnPlayer'
+import StyledWbnPlayer from '../styles/StyledWbnPlayer';
 
 const theme = {
   bgcolor: '#353535',
@@ -24,7 +24,7 @@ const themeLight = {
   color: '#353535',
 }
 
-const WbnPlayer = props => {
+const WbnPlayer = ({ match, history, location, ...props }) => {
 
   const videos = JSON.parse(document.querySelector('[name="videos"]').value);
 
@@ -34,7 +34,24 @@ const WbnPlayer = props => {
     nightMode: true,
     playlistId: videos.playlistId,
     autoplay: false,
-  })
+  });
+
+  useEffect(() => {
+    const videoId = match.params.activeVideo;
+    if (videoId) {
+      const newActiveVideo = state.videos.findIndex(video => video.id === videoId);
+      setState(prev => ({
+        ...prev,
+        activeVideo: prev.videos[newActiveVideo],
+        autoplay: location.autoplay,
+      }))
+    } else {
+      history.push({
+        pathname: `/${state.activeVideo.id}`,
+        autoplay: false,
+      })
+    }
+  }, [ history, location.autoplay, match.params.activeVideo, state.activeVideo.id, state.videos ]);
 
   const nightModeCallback = () => {}
   const endCallback = () => {}
