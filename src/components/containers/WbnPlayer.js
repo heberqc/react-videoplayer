@@ -53,9 +53,35 @@ const WbnPlayer = ({ match, history, location, ...props }) => {
     }
   }, [ history, location.autoplay, match.params.activeVideo, state.activeVideo.id, state.videos ]);
 
-  const nightModeCallback = () => {}
-  const endCallback = () => {}
-  const progressCallback = () => {}
+  const nightModeCallback = () => {
+    setState(prev => ({
+      ...prev,
+      nightMode: !prev.nightMode,
+    }))
+  }
+
+  const endCallback = () => {
+    const videoId = match.params.activeVideo;
+    const currentVideoIndex = state.videos.findIndex(video => video.id === videoId);
+    const nextVideo = currentVideoIndex === state.videos.length - 1 ?
+      0 : currentVideoIndex + 1;
+
+    history.push({
+      pathname: `/${state.videos[nextVideo].id}`,
+      autoplay: currentVideoIndex !== state.videos.length - 1,
+    })
+  }
+
+  const progressCallback = e => {
+    if (e.playedSeconds > 10 && e.playedSeconds < 11) {
+      setState(prev => ({
+        ...prev,
+        videos: prev.videos.map(video => video.id === prev.activeVideo.id ?
+          { ...video, played: true } : video
+        ),
+      }))
+    }
+  }
 
   return (
     <ThemeProvider theme={ state.nightMode ? theme : themeLight }>
